@@ -1,132 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | flychickweb</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">flychickweb</div>
+      </div>
+    </div>
+    <script>
 
-        <link rel="stylesheet" href="assets/css/styles.css">
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
 
-       
-        <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
 
-        <title>Polatcan Gürbüz Portfolyo Sitesi</title>
-    </head>
-    <body>
-        <header class="l-header">
-            <nav class="nav bd-grid">
-                <div>
-                    <a href="#" class="nav__logo">Polatcan Gürbüz</a>
-                </div>
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/webflychick.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/webflychick.data.br",
+        frameworkUrl: buildUrl + "/webflychick.framework.js.br",
+        codeUrl: buildUrl + "/webflychick.wasm.br",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Polatcangurbuz",
+        productName: "flychickweb",
+        productVersion: "1.0.3",
+        showBanner: unityShowBanner,
+      };
 
-                <div class="nav__menu" id="nav-menu">
-                    <ul class="nav__list">
-                        <li class="nav__item"><a href="#home" class="nav__link active-link">Anasayfa</a></li>
-                        <li class="nav__item"><a href="#about" class="nav__link">Hakkımda</a></li>
-                        <li class="nav__item"><a href="#work" class="nav__link">Projelerim</a></li>
-                        <li class="nav__item"><a href="#contact" class="nav__link">İletişime Geç</a></li>
-                    </ul>
-                </div>
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
 
-                <div class="nav__toggle" id="nav-toggle">
-                    <i class='bx bx-menu'></i>
-                </div>
-            </nav>
-        </header>
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
 
-        <main class="l-main">
-       
-            <section class="home bd-grid" id="home">
-                <div class="home__data">
-                    <h1 class="home__title">Merhaba, Ben <br><span class="home__title-color">Polatcan Gürbüz</span><br> Game Developer</h1>
-                    
-                </div>
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
 
-                <div class="home__social">
-                    <a href="https://www.linkedin.com/in/polatcangurbuz/" target="_blank" class="home__social-icon"><i class='bx bxl-linkedin'></i></a>
-                    <a href="https://github.com/polatcangurbuz" target="_blank" class="home__social-icon"><i class='bx bxl-github' ></i></a>
-                    
-                </div>
-
-                <div class="home__img">
-                    <svg class="home__blob" viewBox="0 0 479 467" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                        <mask id="mask0" mask-type="alpha">
-                            <path d="M9.19024 145.964C34.0253 76.5814 114.865 54.7299 184.111 29.4823C245.804 6.98884 311.86 -14.9503 370.735 14.143C431.207 44.026 467.948 107.508 477.191 174.311C485.897 237.229 454.931 294.377 416.506 344.954C373.74 401.245 326.068 462.801 255.442 466.189C179.416 469.835 111.552 422.137 65.1576 361.805C17.4835 299.81 -17.1617 219.583 9.19024 145.964Z"/>
-                        </mask>
-                        <g mask="url(#mask0)">
-                            <path d="M9.19024 145.964C34.0253 76.5814 114.865 54.7299 184.111 29.4823C245.804 6.98884 311.86 -14.9503 370.735 14.143C431.207 44.026 467.948 107.508 477.191 174.311C485.897 237.229 454.931 294.377 416.506 344.954C373.74 401.245 326.068 462.801 255.442 466.189C179.416 469.835 111.552 422.137 65.1576 361.805C17.4835 299.81 -17.1617 219.583 9.19024 145.964Z"/>
-                            <image class="home__blob-img" x="50" y="60" href="assets/img/perfil.png"/>
-                        </g>
-                    </svg>
-                </div>
-            </section>
-
-         
-            <section class="about section " id="about">
-                <h2 class="section-title">Hakkımda</h2>
-
-                <div class="about__container bd-grid">
-                    <div class="about__img">
-                        <img src="assets/img/about.jpg" alt="">
-                    </div>
-                    
-                    <div>
-                        <h2 class="about__subtitle">Ben Polatcan Gürbüz</h2>
-                        <p class="about__text">Karadeniz Teknik Üniversitesi Yazılım Mühendisliği 2.sınıf öğrencisiyim. Yaklaşık 1.5 yıl süresince KTÜ Yazılım Kulübünde Social Media Manager olarak görev aldıktan sonra 2024 itibariyle kulüp başkanı olarak görev almaya başladım. <br>Btk Akademi ve Arnavutköy oyun geliştirme kampları ile Unity'de oyun geliştirme alanında temel gelişimimi sağladım. 2024 Google oyun ve uygulama akademisi bursiyeri olarak oyun alanında uzmanlaşmaya ve bir çok konudaki eğitimlerle kendimi geliştirmeye devam ediyorum. </p>           
-                    </div>                                   
-                </div>
-            </section>
-         
-            <section class="work section" id="work">
-                <h2 class="section-title">Projelerim</h2><br>
-
-                <h1 style="color: #27296d;display: flex;
-                justify-content: center;
-                align-items: center;">Poly Paint Arena</h4><br>
-                <video src="assets/video/polyPaintArena.mp4" type="video/mp4" id="videom" height="500px" controls ></video><br>
-                <div >
-                <p style="width: 1100px; margin: auto;" class="yazi">Üretken Akademi ve paydaşlarıyla birlikte hazırlanan 7 haftalık eğitimi başarıyla tamamlayarak 5 gün süren kampa katılma fırsatı yakaladım. <br>
-
-                    Bu kamp içerisinde tanışma fırsatı bulduğumuz ekip arkadaşlarım ile birlikte eşsiz fikirler ve dayanışma içerisinde bulduğumuz oyun fikriyle kamp süresince yorulmak bilmeden yapmış olduğumuz 1v1 çevrim içi mobil oyunumuzun prototipini çıkarıp jurilere sunma fırsatımız oldu.<br>
-                    
-                    Oyunumuz  kullanıcıya heyecan verici  bir ortam sunarak ister arkadaşlarıyla ister farklı bir oyuncuyla birlikte rekabet ortamı ortaya koyarak doyasıya eğlenceyi hedef almasıyla oluşan güzel bir oyun oldu.
-                    </p></div><br>
-                    <video src="assets/video/flychickvideo.mp4" type="video/mp4" id="videom" width="1000px" height="500px"controls></video><br>
-                    <div >
-                        <p style="width: 1100px; margin: auto;" class="yazi">Bireysel olarak geliştirdiğim FLYCHICK, FlappyBird oyununa daha fazla aksiyon ve zorluk katarak oyunculara heyecan vermeyi amaçlayan mobil oyun olarak hayat buldu.<br>
-                            Tavuk ile çıktığımız bu sonsuz macerada mısırları toplayarak açlığımızı giderebilir, trambolinle zıplayarak uzayın güzelliklerini görüntüleyebiliriz.<br>
-                            Apk olarak varlığını sürdüren FLYCHICK, önümüzdeki süreçlerde storelarda herkese açık yayınlanması ümidiyle 😊
-            </section>
-
-           
-            <section class="contact section" id="contact">
-                <h2 class="section-title">İletişime Geç</h2>
-
-                <div class="contact__container bd-grid">
-                    <form action="mailgonder.php" method="post" class="contact__form">
-                        <input type="text" placeholder="İsim" class="contact__input">
-                        <input type="mail" placeholder="E-mail" class="contact__input">
-                        <textarea name="message" id="" cols="0" rows="10" class="contact__input"></textarea>
-                        <input type="submit" value="Gönder" class="contact__button button">
-                    </form>
-                </div>
-            </section>
-        </main>
-
-    
-        <footer class="footer">
-            <p class="footer__title">Polatcan Gürbüz</p>
-            <div class="footer__social">
-            
-                <a href="https://www.instagram.com/polatcangurbuz/" class="footer__icon"><i class='bx bxl-instagram' ></i></a>
-            </div>
-            <p class="footer__copy">polatcangurbuz@gmail.com </p>
-        </footer>
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
 
 
-      
-        <script src="https://unpkg.com/scrollreveal"></script>
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
-        <!--===== MAIN JS =====-->
-        <script src="assets/js/main.js"></script>
-    </body>
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
 </html>
